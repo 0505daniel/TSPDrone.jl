@@ -203,7 +203,8 @@ function tsp_ep_all(
     local_search_methods=[two_point_move, one_point_move, two_opt_move], 
     flying_range=MAX_DRONE_RANGE, 
     time_limit=MAX_TIME_LIMIT,
-    quadratic_ep_boost=true
+    quadratic_ep_boost=true,
+    initial_tour::Union{Vector{Int}, Nothing}=nothing
 )    
     """
     Runs `TSP-ep-all` heuristic algorithm of Agatz et al.
@@ -211,6 +212,7 @@ function tsp_ep_all(
     `x_coordinates[1]`, `y_coordinates[1]`: the coordinates of the depot, then followed by all customer location coordinates
     `truck_cost_factor`: as defined in Agatz et al. instances
     `drone_cost_factor`: as defined in Agatz et al. instances
+    `initial_tour`: optional initial TSP tour (if provided, skips TSP tour generation)
     """
 
     Ct, Cd = cost_matrices_with_dummy(x_coordinates, y_coordinates, truck_cost_factor, drone_cost_factor)
@@ -219,8 +221,16 @@ function tsp_ep_all(
     @assert n_nodes + 1 == n1
     @assert size(Ct) == size(Cd)
 
-    tsp_tour = find_tsp_tour(x_coordinates, y_coordinates)
-    push!(tsp_tour, n_nodes+1) # adding a dummy node for the returning depot 
+    if initial_tour === nothing
+        tsp_tour = find_tsp_tour(x_coordinates, y_coordinates)
+        push!(tsp_tour, n_nodes+1) # adding a dummy node for the returning depot 
+    else
+        tsp_tour = copy(initial_tour)
+        # Ensure it ends with dummy depot
+        if tsp_tour[end] != n_nodes + 1
+            push!(tsp_tour, n_nodes+1)
+        end
+    end
 
     return tsp_ep_all(Ct, Cd, tsp_tour, flying_range=flying_range, local_search_methods=local_search_methods, time_limit=time_limit, quadratic_ep_boost=quadratic_ep_boost)
 end

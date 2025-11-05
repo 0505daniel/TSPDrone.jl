@@ -6,7 +6,8 @@ function divide_partition_search(
     n_groups::Int = 1, 
     local_search_methods::Vector{Function} = Function[two_point_move, one_point_move, two_opt_move], 
     flying_range::Float64 = MAX_DRONE_RANGE, 
-    time_limit::Float64 = MAX_TIME_LIMIT
+    time_limit::Float64 = MAX_TIME_LIMIT,
+    initial_tour::Union{Vector{Int}, Nothing}=nothing
 )
 
     time0 = time()
@@ -16,8 +17,16 @@ function divide_partition_search(
 
     @assert size(Ct) == size(Cd)
 
-    tsp_tour = find_tsp_tour(Ct[1:end-1, 1:end-1])
-    push!(tsp_tour, n_nodes+1) # adding the final depot
+    if initial_tour === nothing
+        tsp_tour = find_tsp_tour(Ct[1:end-1, 1:end-1])
+        push!(tsp_tour, n_nodes+1) # adding the final depot
+    else
+        tsp_tour = copy(initial_tour)
+        # Ensure it ends with dummy depot
+        if tsp_tour[end] != n_nodes + 1
+            push!(tsp_tour, n_nodes+1)
+        end
+    end
 
     total_tspd_len = 0.0
     total_t_route = Int[]

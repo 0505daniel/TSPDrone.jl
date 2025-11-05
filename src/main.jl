@@ -42,12 +42,13 @@ function solve_tspd(
     n_groups::Int = 1, 
     method::String = "TSP-ep-all", 
     flying_range::Float64 = MAX_DRONE_RANGE, 
-    time_limit::Float64 = MAX_TIME_LIMIT
+    time_limit::Float64 = MAX_TIME_LIMIT,
+    initial_tour::Union{Vector{Int}, Nothing}=nothing
 )
     local_search_methods = local_search_functions(method)
     Ct, Cd = cost_matrices_with_dummy(x, y, truck_cost_factor, drone_cost_factor)
 
-    total_tspd_len, truck_route, drone_route = divide_partition_search(Ct, Cd; local_search_methods=local_search_methods, n_groups=n_groups, flying_range=flying_range, time_limit=time_limit)
+    total_tspd_len, truck_route, drone_route = divide_partition_search(Ct, Cd; local_search_methods=local_search_methods, n_groups=n_groups, flying_range=flying_range, time_limit=time_limit, initial_tour=initial_tour)
 
     result = TSPDroneResult(total_tspd_len, truck_route, drone_route, Ct, Cd, flying_range)
     return result
@@ -60,12 +61,13 @@ function solve_tspd(
     n_groups::Int = 1, 
     method::String = "TSP-ep-all", 
     flying_range::Float64 = MAX_DRONE_RANGE, 
-    time_limit::Float64 = MAX_TIME_LIMIT
+    time_limit::Float64 = MAX_TIME_LIMIT,
+    initial_tour::Union{Vector{Int}, Nothing}=nothing
 )
     Ct, Cd = cost_matrices_with_dummy(truck_cost_mtx, drone_cost_mtx)
     local_search_methods = local_search_functions(method)
 
-    total_tspd_len, truck_route, drone_route = divide_partition_search(Ct, Cd; local_search_methods=local_search_methods, n_groups=n_groups, flying_range=flying_range, time_limit=time_limit)
+    total_tspd_len, truck_route, drone_route = divide_partition_search(Ct, Cd; local_search_methods=local_search_methods, n_groups=n_groups, flying_range=flying_range, time_limit=time_limit, initial_tour=initial_tour)
 
     result = TSPDroneResult(total_tspd_len, truck_route, drone_route, Ct, Cd, flying_range)
     return result
